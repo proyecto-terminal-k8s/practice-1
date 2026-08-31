@@ -1,4 +1,4 @@
-# Práctica 0: crear un clúster con Minikube
+# Práctica 1: crear un clúster con Minikube
 
 ## Propósito
 
