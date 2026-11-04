@@ -14,20 +14,23 @@ imágenes, se provocará un fallo de descarga y se restaurará una revisión vá
 
 ## Preparar las imágenes
 
-Construye y publica dos etiquetas distintas de la misma aplicación. La segunda
-imagen solo necesita existir para demostrar que Kubernetes cambia entre etiquetas;
-podrás sustituirla por una versión propia del frontend cuando amplíes la práctica:
+Para Minikube, construye las dos etiquetas y cárgalas directamente en el clúster.
+Así no necesitas crear ni autenticarte en ningún registro:
 
 ```bash
 cd ../calculadora-frontend
-docker build -t tu-registro/calculadora-frontend:v1 .
-docker push tu-registro/calculadora-frontend:v1
-docker tag tu-registro/calculadora-frontend:v1 tu-registro/calculadora-frontend:v2
-docker push tu-registro/calculadora-frontend:v2
+docker build -t calculadora-frontend:v1 .
+docker tag calculadora-frontend:v1 calculadora-frontend:v2
+minikube image load calculadora-frontend:v1
+minikube image load calculadora-frontend:v2
 cd ../practice-1
 ```
 
-Reemplaza `your-registry` por `tu-registro` en ambos manifiestos antes de aplicarlos.
+Los manifiestos ya usan esas imágenes locales y `imagePullPolicy: IfNotPresent`.
+
+Si prefieres usar un registro externo, construye y publica las etiquetas con un
+nombre como `tu-registro/calculadora-frontend:v1`, reemplaza ese nombre en ambos
+manifiestos y ejecuta `docker push`.
 
 ## 1. Desplegar la versión inicial
 
@@ -59,7 +62,7 @@ kubectl rollout history deployment/calculadora-frontend -n practice-1
 ## 4. Probar un fallo y hacer rollback
 
 ```bash
-kubectl set image deployment/calculadora-frontend frontend=tu-registro/calculadora-frontend:inexistente -n practice-1
+kubectl set image deployment/calculadora-frontend frontend=calculadora-frontend:inexistente -n practice-1
 kubectl annotate deployment/calculadora-frontend kubernetes.io/change-cause="imagen inexistente" --overwrite -n practice-1
 kubectl rollout status deployment/calculadora-frontend --timeout=90s -n practice-1
 kubectl rollout undo deployment/calculadora-frontend -n practice-1
